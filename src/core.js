@@ -3,16 +3,22 @@ let notone = {};
 let storage = {}
 
 function init(dict) {
+  // 拼音数组
   allPinyin = Object.keys(dict)
   notone = parseDict(dict)
   return match
 }
 
+// 汉字为key，拼音为value
 function parseDict(dict) {
+
   let parseDict = {}
+  // i表示拼音， temp每组拼音汉字
   for (let i in dict) {
     let temp = dict[i]
     for (let j = 0, len = temp.length; j < len; j++) {
+      // temp[j] 每个汉字
+      // 多音字
       if (!parseDict[temp[j]]) {
         parseDict[temp[j]] = i
       } else {
@@ -22,10 +28,11 @@ function parseDict(dict) {
   }
   return parseDict
 }
-
+// 获取输入字符的全部拼音
+// [" ", " ", " ", "wo", " ", "ai", "ni", " ", "zhong", " ", " ", " ", "guo", " ", " ", " "]
 function getPinyin(cn) {
   let result = []
-  for (let i = 0, len = cn.length; i < len; i ++) {
+  for (let i = 0, len = cn.length; i < len; i++) {
     let temp = cn.charAt(i)
     result.push(notone[temp] || temp)
   }
@@ -43,7 +50,7 @@ function wordBreak(s) {
   getAllSolutions(0, s, result, solutions, possible)
   return solutions
 }
-
+// 获取所有的拼音组合
 function getAllSolutions(start, s, result, solutions, possible) {
   if (start === s.length) {
     solutions.push(result.join(' '))
@@ -102,7 +109,7 @@ function getFullKey(key) {
     result.push(key.split(''))
   }
   // 缓存当前结果 避免重复计算
-  storage = {[key]: result}
+  storage = { [key]: result }
   return result
 }
 function point2point(test, key, last, extend) {
@@ -118,11 +125,16 @@ function point2point(test, key, last, extend) {
   }
   return a.some((i) => i.indexOf(key) === 0)
 }
-
+// input 目标字符串
+// 输入的拼音或其他关键词
 function match(input, keys) {
+  // 如果二者不存在其一，返回false
   if (!input || !keys) return false
+  // 转小写
   input = input.toLowerCase()
+  // 去空格转小写
   keys = keys.replace(/\s+/g, '').toLowerCase()
+  // 通过indexof判断，如果存在，直接返回
   let indexOf = input.indexOf(keys)
   if (indexOf !== -1) {
     return [indexOf, indexOf + keys.length - 1]
@@ -135,19 +147,25 @@ function match(input, keys) {
   let fullString = storage[keys] || getFullKey(keys)
   return getIndex(py, fullString, keys)
 }
+// py  input通过split之后的数组  [" ", " ", " ", "我", " ", "爱", "你", " ", "中", " ", " ", " ", "国", " ", " ", " "]
+// fullString  key通过split之后的数组 [["n", "z", "g"]]
+// keys key 'nzg'
 function getIndex(py, fullString, keys) {
   for (let p = 0; p < py.length; p++) {
     for (let k = 0; k < fullString.length; k++) {
-      let key = fullString[k]
-      let keyLength = key.length
-      let extend = (keyLength === keys.length)
+      let key = fullString[k] //  nzg
+      let keyLength = key.length  //   3
+      let extend = (keyLength === keys.length) // true
       let isMatch = true
       let i = 0
-      let preSpaceNum = 0
+      let preSpaceNum = 0 //记录匹配字符之前的空格
       let spaceNum = 0
+      //  key中具体的某一个字符的长度< input通过split之后的数组
+      // 1             20
       if (keyLength <= py.length) {
         for (; i < key.length; i++) {
-          if (i === 0 && py[p + i + preSpaceNum] === ' ') {
+          // 如果为空格，直到匹配到非空格字符
+          if (i === 0 && py[p + preSpaceNum] === ' ') {
             preSpaceNum += 1
             i -= 1
           } else {
@@ -171,3 +189,4 @@ function getIndex(py, fullString, keys) {
   return false
 }
 export default init
+
